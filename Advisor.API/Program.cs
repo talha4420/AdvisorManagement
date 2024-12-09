@@ -1,41 +1,62 @@
+using Microsoft.EntityFrameworkCore;
+using Asp.Versioning;
+using Advisor.Core.DBContexts;
+using Advisor.Domain.DomainServices;
+using Advisor.Domain.Models;
+using Advisor.Core.Repositories;
+using Advisor.Services.Models;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure EF Core to use an in-memory database
+builder.Services.AddDbContext<AdvisorDBContext>(options =>
+    options.UseInMemoryDatabase("AdvisorDB"));
+
+// Register services
+builder.Services.AddScoped<IDBRepository<AdvisorProfile>, DBRepository<AdvisorProfile, AdvisorDBContext>>();
+builder.Services.AddScoped<IAdvisorCommand, AdvisorCommandService>();
+builder.Services.AddScoped<IAdvisorQuery, AdvisorQueryService>();
+builder.Services.AddScoped<IHealthStatusGenerator, HealthStatusGeneratorService>();
+
+// Configure API versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+}).AddApiExplorer(options=>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
+
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.NewVersionedApi("Advisor API")
+    .MapAdvisorApiV1();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+public partial class Program { }
