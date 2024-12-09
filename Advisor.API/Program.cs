@@ -1,23 +1,21 @@
 using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using Advisor.Core.DBContexts;
-using Advisor.Domain.DomainServices;
 using Advisor.Domain.Models;
 using Advisor.Core.Repositories;
 using Advisor.Services.Models;
-using System.Text.Json.Serialization;
 using Advisor.API.ExceptionHandling;
+using Advisor.Domain.DomainServices;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add ProblemDetails and Exception Handlers
 builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
 builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 // Add services to the container.
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -25,7 +23,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AdvisorDBContext>(options =>
     options.UseInMemoryDatabase("AdvisorDB"));
 
-// Register services
+
+
+// Register repositories and services
 builder.Services.AddScoped<IDBRepository<AdvisorProfile>, DBRepository<AdvisorProfile, AdvisorDBContext>>();
 builder.Services.AddScoped<IAdvisorCommand, AdvisorCommandService>();
 builder.Services.AddScoped<IAdvisorQuery, AdvisorQueryService>();
@@ -37,18 +37,15 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
-}).AddApiExplorer(options=>
+}).AddApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
 });
 
-
-builder.Services.AddEndpointsApiExplorer();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -56,7 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseExceptionHandler();
+app.UseExceptionHandler(); 
+
 app.NewVersionedApi("Advisor API")
     .MapAdvisorApiV1();
 

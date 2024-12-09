@@ -1,6 +1,9 @@
 using Advisor.Domain.Models;
 using Advisor.Services.Models;
 using Asp.Versioning.Conventions;
+using AutoMapper;
+using Advisor.API.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 public static class AdvisorApi
 {
@@ -27,51 +30,84 @@ public static class AdvisorApi
             .MapToApiVersion(1.0);
     }
 
-    public static async Task<IResult> GetAdvisors(IAdvisorQuery service)
+    public static async Task<IResult> GetAdvisors(
+        [FromServices] IAdvisorQuery service,
+        [FromServices] IMapper mapper)
     {
         var advisors = await service.GetAdvisorsAsync();
-        return Results.Ok(advisors);
+        var responseDtos = mapper.Map<IEnumerable<AdvisorProfileResponseDto>>(advisors);
+        return Results.Ok(responseDtos);
     }
 
-    public static async Task<IResult> GetAdvisor(Guid id, IAdvisorQuery service)
+    public static async Task<IResult> GetAdvisor(
+        Guid id,
+        [FromServices] IAdvisorQuery service,
+        [FromServices] IMapper mapper)
     {
         var advisor = await service.GetAdvisorAsync(id);
 
         if (advisor == null)
         {
-            return Results.NotFound($"Advisor with ID {id} not found.");
+            return Results.NotFound( $"Advisor with ID {id} not found." );
         }
 
-        return Results.Ok(advisor);
+        var responseDto = mapper.Map<AdvisorProfileResponseDto>(advisor);
+        return Results.Ok(responseDto);
     }
 
-    public static async Task<IResult> CreateAdvisor(AdvisorProfile advisor, IAdvisorCommand service)
+    public static async Task<IResult> CreateAdvisor(
+        [FromBody] AdvisorProfileRequestDto requestDto,
+        [FromServices] IAdvisorCommand service,
+        [FromServices] IMapper mapper)
     {
+        if (requestDto == null)
+        {
+            return Results.BadRequest(new { Message = "Invalid request data." });
+        }
+
+        var advisor = mapper.Map<AdvisorProfile>(requestDto);
         var createdAdvisor = await service.CreateAdvisorAsync(advisor);
-        return Results.Created($"/api/v1/advisors/{createdAdvisor.Id}", createdAdvisor);
+
+        var responseDto = mapper.Map<AdvisorProfileResponseDto>(createdAdvisor);
+        return Results.Created($"/api/v1/advisors/{responseDto.Id}", responseDto);
     }
 
-    public static async Task<IResult> UpdateAdvisor(Guid id, AdvisorProfile advisor, IAdvisorCommand service)
+    public static async Task<IResult> UpdateAdvisor(
+        Guid id,
+        [FromBody] AdvisorProfileRequestDto requestDto,
+        [FromServices] IAdvisorCommand service,
+        [FromServices] IMapper mapper)
     {
+        if (requestDto == null)
+        {
+            return Results.BadRequest(new { Message = "Invalid request data." });
+        }
+
+        var advisor = mapper.Map<AdvisorProfile>(requestDto);
         var updatedAdvisor = await service.UpdateAdvisorAsync(id, advisor);
 
         if (updatedAdvisor == null)
         {
-            return Results.NotFound($"Advisor with ID {id} not found.");
+            return Results.NotFound( $"Advisor with ID {id} not found." );
         }
 
-        return Results.Ok(updatedAdvisor);
+        var responseDto = mapper.Map<AdvisorProfileResponseDto>(updatedAdvisor);
+        return Results.Ok(responseDto);
     }
 
-    public static async Task<IResult> DeleteAdvisor(Guid id, IAdvisorCommand service)
+    public static async Task<IResult> DeleteAdvisor(
+        Guid id,
+        [FromServices] IAdvisorCommand service,
+        [FromServices] IMapper mapper)
     {
         var deletedAdvisor = await service.DeleteAdvisorAsync(id);
 
         if (deletedAdvisor == null)
         {
-            return Results.NotFound($"Advisor with ID {id} not found.");
+            return Results.NotFound( $"Advisor with ID {id} not found." );
         }
 
-        return Results.Ok(deletedAdvisor);
+        var responseDto = mapper.Map<AdvisorProfileResponseDto>(deletedAdvisor);
+        return Results.Ok(responseDto);
     }
 }
