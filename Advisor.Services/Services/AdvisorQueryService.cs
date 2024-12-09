@@ -1,24 +1,64 @@
 using Advisor.Core.Repositories;
 using Advisor.Domain.Models;
 using Advisor.Services.Models;
+using Microsoft.Extensions.Logging;
+using System.Data.Common;
 
 public class AdvisorQueryService : IAdvisorQuery
 {
     private readonly IDBRepository<AdvisorProfile> _advisorRepository;
+    private readonly ILogger<AdvisorQueryService> _logger;
 
-    public AdvisorQueryService(IDBRepository<AdvisorProfile> advisorRepository)
+    public AdvisorQueryService(IDBRepository<AdvisorProfile> advisorRepository, 
+                                ILogger<AdvisorQueryService> logger)
     {
         _advisorRepository = advisorRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<AdvisorProfile>> GetAdvisorsAsync()
     {
-        return await _advisorRepository.GetAllAsync();
+        try
+        {
+            _logger.LogInformation("Fetching all advisors at {Time}", DateTime.UtcNow);
+            var advisors = await _advisorRepository.GetAllAsync();
+            return advisors;
+        }
+        catch (DbException dbEx) 
+        {
+            _logger.LogError(dbEx, "A database error occurred while fetching all advisors at {Time}", DateTime.UtcNow);
+            throw new ApplicationException("A database error occurred while retrieving advisors.", dbEx);
+        }
+        catch (Exception ex) 
+        {
+            _logger.LogError(ex, "An unexpected error occurred while fetching all advisors at {Time}", DateTime.UtcNow);
+            throw new ApplicationException("An unexpected error occurred while retrieving advisors.", ex);
+        }
     }
 
     public async Task<AdvisorProfile> GetAdvisorAsync(Guid id)
     {
-        return await _advisorRepository.GetAsync(id);
-    }
+        try
+        {
+            _logger.LogInformation("Fetching advisor with ID: {Id} at {Time}", id, DateTime.UtcNow);
+            var advisor = await _advisorRepository.GetAsync(id);
 
+            if (advisor == null)
+            {
+                _logger.LogWarning("Advisor with ID: {Id} not found at {Time}", id, DateTime.UtcNow);
+            }
+
+            return advisor;
+        }
+        catch (DbException dbEx)
+        {
+            _logger.LogError(dbEx, "A database error occurred while fetching the advisor with ID: {Id} at {Time}", id, DateTime.UtcNow);
+            throw new ApplicationException($"A database error occurred while retrieving advisor with ID: {id}.", dbEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while fetching the advisor with ID: {Id} at {Time}", id, DateTime.UtcNow);
+            throw new ApplicationException($"An unexpected error occurred while retrieving advisor with ID: {id}.", ex);
+        }
+    }
 }
