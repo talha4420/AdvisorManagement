@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Advisor.Tests.IntegrationTests;
 public class AdvisorCommandServiceIntegrationTests
 {
-    private readonly DBRepository<AdvisorProfile> _repository;
+    private readonly DBRepository<AdvisorProfile, AdvisorDBContext> _repository;
     private readonly IHealthStatusGenerator _healthStatusGenerator;
     private readonly AdvisorCommandService _service;
     private readonly AdvisorDBContext _context;
@@ -19,7 +19,7 @@ public class AdvisorCommandServiceIntegrationTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _context = new AdvisorDBContext(options);
-        _repository = new DBRepository<AdvisorProfile>(_context);
+        _repository = new DBRepository<AdvisorProfile, AdvisorDBContext>(_context);
         _healthStatusGenerator = new HealthStatusGeneratorService();
         _service = new AdvisorCommandService(_repository, _healthStatusGenerator);
     }

@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 
 namespace Advisor.Core.Repositories;
-public class DBRepository<T> : IDBRepository<T> where T : class
+public class DBRepository<T, TContext> : IDBRepository<T> 
+    where T : class
+    where TContext : DbContext
 {
-    private readonly DbContext _context;
-    public DBRepository(DbContext context)
+    private readonly TContext _context;
+    public DBRepository(TContext context)
     {
-        _context = context;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
     public async Task<T> CreateAsync(T entity)
     {

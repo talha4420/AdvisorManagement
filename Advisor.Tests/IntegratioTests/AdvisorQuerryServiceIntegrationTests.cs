@@ -7,7 +7,7 @@ namespace Advisor.Tests.IntegrationTests;
 public class AdvisorQueryServiceIntegrationTests
 {
     private readonly AdvisorDBContext _context;
-    private readonly DBRepository<AdvisorProfile> _repository;
+    private readonly DBRepository<AdvisorProfile, AdvisorDBContext> _repository;
     private readonly AdvisorQueryService _service;
 
     public AdvisorQueryServiceIntegrationTests()
@@ -16,7 +16,7 @@ public class AdvisorQueryServiceIntegrationTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _context = new AdvisorDBContext(options);
-        _repository = new DBRepository<AdvisorProfile>(_context);
+        _repository = new DBRepository<AdvisorProfile, AdvisorDBContext>(_context);
         _service = new AdvisorQueryService(_repository);
     }
 
