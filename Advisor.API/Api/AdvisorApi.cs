@@ -29,84 +29,49 @@ public static class AdvisorApi
 
     public static async Task<IResult> GetAdvisors(IAdvisorQuery service)
     {
-        try
-        {
-            var advisors = await service.GetAdvisorsAsync();
-            return Results.Ok(advisors);
-        }
-        catch (Exception)
-        {
-            return Results.Problem("An unexpected error occurred while retrieving advisors.", statusCode: 500);
-        }
+        var advisors = await service.GetAdvisorsAsync();
+        return Results.Ok(advisors);
     }
 
     public static async Task<IResult> GetAdvisor(Guid id, IAdvisorQuery service)
     {
-        try
-        {
-            var advisor = await service.GetAdvisorAsync(id);
+        var advisor = await service.GetAdvisorAsync(id);
 
-            if (advisor == null)
-            {
-                return Results.NotFound($"Advisor with ID {id} not found.");
-            }
-
-            return Results.Ok(advisor);
-        }
-        catch (Exception)
+        if (advisor == null)
         {
-            return Results.Problem($"An unexpected error occurred while retrieving advisor with ID {id}.", statusCode: 500);
+            return Results.NotFound($"Advisor with ID {id} not found.");
         }
+
+        return Results.Ok(advisor);
     }
 
     public static async Task<IResult> CreateAdvisor(AdvisorProfile advisor, IAdvisorCommand service)
     {
-        try
-        {
-            var createdAdvisor = await service.CreateAdvisorAsync(advisor);
-            return Results.Created($"/api/v1/advisors/{createdAdvisor.Id}", createdAdvisor);
-        }
-        catch (Exception)
-        {
-            return Results.Problem("An unexpected error occurred while creating the advisor.", statusCode: 500);
-        }
+        var createdAdvisor = await service.CreateAdvisorAsync(advisor);
+        return Results.Created($"/api/v1/advisors/{createdAdvisor.Id}", createdAdvisor);
     }
 
     public static async Task<IResult> UpdateAdvisor(Guid id, AdvisorProfile advisor, IAdvisorCommand service)
     {
-        try
-        {
-            var updatedAdvisor = await service.UpdateAdvisorAsync(id, advisor);
+        var updatedAdvisor = await service.UpdateAdvisorAsync(id, advisor);
 
-            if (updatedAdvisor == null)
-            {
-                return Results.NotFound($"Advisor with ID {id} not found.");
-            }
-
-            return Results.Ok(updatedAdvisor);
-        }
-        catch (Exception)
+        if (updatedAdvisor == null)
         {
-            return Results.Problem($"An unexpected error occurred while updating advisor with ID {id}.", statusCode: 500);
+            return Results.NotFound($"Advisor with ID {id} not found.");
         }
+
+        return Results.Ok(updatedAdvisor);
     }
 
     public static async Task<IResult> DeleteAdvisor(Guid id, IAdvisorCommand service)
     {
-        try
-        {
-            var deletedAdvisor = await service.DeleteAdvisorAsync(id);
+        var deletedAdvisor = await service.DeleteAdvisorAsync(id);
 
-            if (deletedAdvisor == null)
-            {
-                return Results.NotFound($"Advisor with ID {id} not found.");
-            }
-
-            return Results.Ok(deletedAdvisor);
-        }
-        catch (Exception)
+        if (deletedAdvisor == null)
         {
-            return Results.Problem($"An unexpected error occurred while deleting advisor with ID {id}.", statusCode: 500);
+            return Results.NotFound($"Advisor with ID {id} not found.");
         }
+
+        return Results.Ok(deletedAdvisor);
     }
 }

@@ -6,8 +6,11 @@ using Advisor.Domain.Models;
 using Advisor.Core.Repositories;
 using Advisor.Services.Models;
 using System.Text.Json.Serialization;
+using Advisor.API.ExceptionHandling;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
+builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -53,7 +56,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseExceptionHandler();
 app.NewVersionedApi("Advisor API")
     .MapAdvisorApiV1();
 
