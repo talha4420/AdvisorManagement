@@ -1,6 +1,7 @@
 using Advisor.Core.Repositories;
 using Advisor.Domain.DomainServices;
 using Advisor.Domain.Models;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Advisor.Tests.UnitTests;
@@ -8,13 +9,15 @@ public class AdvisorCommandServiceUnitTests
 {
     private readonly Mock<IDBRepository<AdvisorProfile>> _mockRepository;
     private readonly Mock<IHealthStatusGenerator> _mockHealthStatusGenerator;
+    private readonly ILogger<AdvisorCommandService> _logger;
     private readonly AdvisorCommandService _service;
 
     public AdvisorCommandServiceUnitTests()
     {
         _mockRepository = new Mock<IDBRepository<AdvisorProfile>>();
         _mockHealthStatusGenerator = new Mock<IHealthStatusGenerator>();
-        _service = new AdvisorCommandService(_mockRepository.Object, _mockHealthStatusGenerator.Object);
+        _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AdvisorCommandService>();
+        _service = new AdvisorCommandService(_mockRepository.Object, _mockHealthStatusGenerator.Object, _logger);
     }
 
     [Fact]

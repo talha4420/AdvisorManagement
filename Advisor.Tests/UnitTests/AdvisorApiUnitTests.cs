@@ -64,7 +64,7 @@ public class AdvisorApiUnitTests
         var result = await AdvisorApi.GetAdvisor(Guid.NewGuid(), _mockAdvisorQuery.Object);
 
         // Assert
-        Assert.IsType<NotFound>(result);
+        Assert.IsType<NotFound<string>>(result);
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class AdvisorApiUnitTests
         var result = await AdvisorApi.UpdateAdvisor(Guid.NewGuid(), new AdvisorProfile(), _mockAdvisorCommand.Object);
 
         // Assert
-        Assert.IsType<NotFound>(result);
+        Assert.IsType<NotFound<string>>(result);
     }
 
     [Fact]
@@ -138,6 +138,6 @@ public class AdvisorApiUnitTests
         var result = await AdvisorApi.DeleteAdvisor(Guid.NewGuid(), _mockAdvisorCommand.Object);
 
         // Assert
-        Assert.IsType<NotFound>(result);
+        Assert.IsType<NotFound<string>>(result);
     }
 }
