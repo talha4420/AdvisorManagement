@@ -2,12 +2,14 @@ using Advisor.Core.DBContexts;
 using Advisor.Core.Repositories;
 using Advisor.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Advisor.Tests.IntegrationTests;
 public class AdvisorQueryServiceIntegrationTests
 {
     private readonly AdvisorDBContext _context;
     private readonly DBRepository<AdvisorProfile, AdvisorDBContext> _repository;
+    private readonly ILogger<AdvisorQueryService> _logger;
     private readonly AdvisorQueryService _service;
 
     public AdvisorQueryServiceIntegrationTests()
@@ -17,7 +19,8 @@ public class AdvisorQueryServiceIntegrationTests
             .Options;
         _context = new AdvisorDBContext(options);
         _repository = new DBRepository<AdvisorProfile, AdvisorDBContext>(_context);
-        _service = new AdvisorQueryService(_repository);
+        _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AdvisorQueryService>();
+        _service = new AdvisorQueryService(_repository, _logger);
     }
 
     [Fact]

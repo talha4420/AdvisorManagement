@@ -3,6 +3,7 @@ using Advisor.Core.Repositories;
 using Advisor.Domain.DomainServices;
 using Advisor.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Advisor.Tests.IntegrationTests;
 public class AdvisorCommandServiceIntegrationTests
@@ -11,7 +12,8 @@ public class AdvisorCommandServiceIntegrationTests
     private readonly IHealthStatusGenerator _healthStatusGenerator;
     private readonly AdvisorCommandService _service;
     private readonly AdvisorDBContext _context;
-    
+    private readonly ILogger<AdvisorCommandService> _logger;
+
 
     public AdvisorCommandServiceIntegrationTests()
     {
@@ -21,7 +23,8 @@ public class AdvisorCommandServiceIntegrationTests
         _context = new AdvisorDBContext(options);
         _repository = new DBRepository<AdvisorProfile, AdvisorDBContext>(_context);
         _healthStatusGenerator = new HealthStatusGeneratorService();
-        _service = new AdvisorCommandService(_repository, _healthStatusGenerator);
+        _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AdvisorCommandService>();
+        _service = new AdvisorCommandService(_repository, _healthStatusGenerator, _logger);
     }
 
     [Fact]
