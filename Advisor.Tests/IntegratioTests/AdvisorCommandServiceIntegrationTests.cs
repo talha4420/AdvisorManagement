@@ -10,6 +10,7 @@ public class AdvisorCommandServiceIntegrationTests
 {
     private readonly DBRepository<AdvisorProfile, AdvisorDBContext> _repository;
     private readonly IHealthStatusGenerator _healthStatusGenerator;
+    private readonly IModelValidator<AdvisorProfile> _modelValidator;
     private readonly AdvisorCommandService _service;
     private readonly AdvisorDBContext _context;
     private readonly ILogger<AdvisorCommandService> _logger;
@@ -23,8 +24,9 @@ public class AdvisorCommandServiceIntegrationTests
         _context = new AdvisorDBContext(options);
         _repository = new DBRepository<AdvisorProfile, AdvisorDBContext>(_context);
         _healthStatusGenerator = new HealthStatusGeneratorService();
+        _modelValidator = new AdvisorProfileValidator();
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AdvisorCommandService>();
-        _service = new AdvisorCommandService(_repository, _healthStatusGenerator, _logger);
+        _service = new AdvisorCommandService(_repository, _healthStatusGenerator, _modelValidator, _logger);
     }
 
     [Fact]

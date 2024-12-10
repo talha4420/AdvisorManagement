@@ -10,6 +10,8 @@ using Advisor.Domain.DomainServices;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add ProblemDetails and Exception Handlers
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<ArgumentNullExceptionHandler>();
 builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
 builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -30,6 +32,7 @@ builder.Services.AddScoped<IDBRepository<AdvisorProfile>, DBRepository<AdvisorPr
 builder.Services.AddScoped<IAdvisorCommand, AdvisorCommandService>();
 builder.Services.AddScoped<IAdvisorQuery, AdvisorQueryService>();
 builder.Services.AddScoped<IHealthStatusGenerator, HealthStatusGeneratorService>();
+builder.Services.AddScoped<IModelValidator<AdvisorProfile>, AdvisorProfileValidator>();
 
 // Configure API versioning
 builder.Services.AddApiVersioning(options =>
@@ -45,7 +48,6 @@ builder.Services.AddApiVersioning(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -9,15 +9,17 @@ public class AdvisorCommandServiceUnitTests
 {
     private readonly Mock<IDBRepository<AdvisorProfile>> _mockRepository;
     private readonly Mock<IHealthStatusGenerator> _mockHealthStatusGenerator;
+    private readonly Mock<IModelValidator<AdvisorProfile>> _mockValidator;
     private readonly ILogger<AdvisorCommandService> _logger;
     private readonly AdvisorCommandService _service;
 
     public AdvisorCommandServiceUnitTests()
     {
         _mockRepository = new Mock<IDBRepository<AdvisorProfile>>();
+        _mockValidator = new Mock<IModelValidator<AdvisorProfile>>();
         _mockHealthStatusGenerator = new Mock<IHealthStatusGenerator>();
         _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AdvisorCommandService>();
-        _service = new AdvisorCommandService(_mockRepository.Object, _mockHealthStatusGenerator.Object, _logger);
+        _service = new AdvisorCommandService(_mockRepository.Object, _mockHealthStatusGenerator.Object, _mockValidator.Object, _logger);
     }
 
     [Fact]
