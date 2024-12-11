@@ -3,7 +3,6 @@ using Advisor.Domain.Models;
 using Advisor.Services.Models;
 using AutoMapper;
 using Moq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Advisor.Tests.UnitTests;

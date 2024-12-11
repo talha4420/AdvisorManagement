@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Advisor.Tests.IntegrationTests;
-public class AdvisorCommandServiceIntegrationTests
+public class AdvisorCommandServiceIntegrationTests : IDisposable
 {
     private readonly DBRepository<AdvisorProfile, AdvisorDBContext> _repository;
     private readonly IHealthStatusGenerator _healthStatusGenerator;
@@ -100,5 +100,10 @@ public class AdvisorCommandServiceIntegrationTests
 
         // Assert
         Assert.Equal(advisor.Id, result.Id);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
     }
 }

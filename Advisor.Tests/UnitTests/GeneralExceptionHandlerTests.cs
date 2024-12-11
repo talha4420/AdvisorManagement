@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using Xunit;
 
 namespace Advisor.Tests.UnitTests;
 public class GeneralExceptionHandlerTests

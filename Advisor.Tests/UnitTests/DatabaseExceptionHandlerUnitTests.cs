@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System.Data.Common;
 using System.Text.Json;
-using Xunit;
 using Advisor.Tests.Helpers;
 
 namespace Advisor.Tests.UnitTests;
