@@ -36,6 +36,11 @@ public class AdvisorCommandService(
     {
         logger.LogInformation("Starting to update advisor with ID: {AdvisorId} at {Time}.", id, DateTime.UtcNow);
         modelValidator.Validate(advisor);
+
+        if(advisor.Id != id)
+        {
+            advisor.Id = id;
+        }
         var updatedAdvisor = await advisorRepository.UpdateAsync(id, advisor);
 
         if (updatedAdvisor == null)
