@@ -15,5 +15,5 @@ public class AdvisorProfileResponseDto
     public string? Address { get; set; }
     public string SIN { get; set; }
     public string PhoneNumber { get; set; }
-    public string HealthStatus { get; set; }
+    public string HealthStatus { get; private set; }
 }
