@@ -6,15 +6,14 @@ using Moq;
 using System.Data.Common;
 using System.Text.Json;
 using Advisor.Tests.Helpers;
-using System.ComponentModel.DataAnnotations;
 
-namespace Advisor.Tests.UnitTests;
-public class ValidationExceptionHandlerUnitTests
+namespace Advisor.Tests.UnitTests.ExceptionHandlerUnitTests;
+public class DatabaseExceptionHandlerUnitTests
 {
-    private readonly ValidationExceptionHandler _handler;
+    private readonly DatabaseExceptionHandler _handler;
     private readonly List<string> _logMessages;
 
-    public ValidationExceptionHandlerUnitTests()
+    public DatabaseExceptionHandlerUnitTests()
     {
         _logMessages = new List<string>();
 
@@ -24,44 +23,43 @@ public class ValidationExceptionHandlerUnitTests
             builder.AddProvider(new InMemoryLoggerProvider(_logMessages));
         });
 
-        var logger = loggerFactory.CreateLogger<ValidationExceptionHandler>();
+        var logger = loggerFactory.CreateLogger<DatabaseExceptionHandler>();
 
-        _handler = new ValidationExceptionHandler(logger);
+        _handler = new DatabaseExceptionHandler(logger);
     }
 
     [Fact]
-    public async Task TryHandleAsync_ShouldHandle_ValidationException()
+    public async Task TryHandleAsync_ShouldHandle_DbException()
     {
         // Arrange
-        var validationException = new Mock<ValidationException>();
+        var dbException = new Mock<DbException>().Object;
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
-        validationException.SetupGet(e => e.Message).Returns("Validation error message");
 
         // Act
-        var result = await _handler.TryHandleAsync(context, validationException.Object, CancellationToken.None);
+        var result = await _handler.TryHandleAsync(context, dbException, CancellationToken.None);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(StatusCodes.Status422UnprocessableEntity, context.Response.StatusCode);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, context.Response.StatusCode);
 
         context.Response.Body.Seek(0, SeekOrigin.Begin);
         var response = await JsonSerializer.DeserializeAsync<ProblemDetails>(context.Response.Body);
 
-        Assert.Equal("Validation Error", response?.Title);
-        Assert.Equal(StatusCodes.Status422UnprocessableEntity, response?.Status);
-        Assert.Equal("Validation error message", response?.Detail);
+        Assert.Equal("Database Error", response?.Title);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, response?.Status);
+        Assert.Equal("A database error occurred. Please contact support.", response?.Detail);
 
         // Verify log output
-        Assert.Contains("Validation exception occurred", _logMessages[0]);
+        Assert.Contains("Database exception occurred", _logMessages[0]);
     }
 
     [Fact]
-    public async Task TryHandleAsync_ShouldHandle_InnerValidationException()
+    public async Task TryHandleAsync_ShouldHandle_InnerDbException()
     {
         // Arrange
-        var validationException = new Mock<ValidationException>();
-        var exception = new Exception("Wrapper Exception", validationException.Object);
+        var dbException = new Mock<DbException>().Object;
+        var exception = new Exception("Wrapper Exception", dbException);
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
 
@@ -70,21 +68,21 @@ public class ValidationExceptionHandlerUnitTests
 
         // Assert
         Assert.True(result); // Ensure the handler handled the exception
-        Assert.Equal(StatusCodes.Status422UnprocessableEntity, context.Response.StatusCode);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, context.Response.StatusCode);
 
         context.Response.Body.Seek(0, SeekOrigin.Begin);
         var response = await JsonSerializer.DeserializeAsync<ProblemDetails>(context.Response.Body);
 
-        Assert.Equal("Validation Error", response?.Title);
-        Assert.Equal(StatusCodes.Status422UnprocessableEntity, response?.Status);
-        Assert.Equal("Wrapper Exception", response?.Detail);
+        Assert.Equal("Database Error", response?.Title);
+        Assert.Equal(StatusCodes.Status503ServiceUnavailable, response?.Status);
+        Assert.Equal("A database error occurred. Please contact support.", response?.Detail);
 
         // Verify log output
-        Assert.Contains("Validation exception occurred", _logMessages[0]);
+        Assert.Contains("Database exception occurred", _logMessages[0]);
     }
 
     [Fact]
-    public async Task TryHandleAsync_ShouldNotHandle_NonValidationException()
+    public async Task TryHandleAsync_ShouldNotHandle_NonDbException()
     {
         // Arrange
         var exception = new Exception("General exception");
@@ -98,6 +96,6 @@ public class ValidationExceptionHandlerUnitTests
         Assert.False(result); // Ensure the handler did NOT handle the exception
         Assert.Equal(StatusCodes.Status200OK, context.Response.StatusCode); // Response status remains unchanged
 
-        
+
     }
 }

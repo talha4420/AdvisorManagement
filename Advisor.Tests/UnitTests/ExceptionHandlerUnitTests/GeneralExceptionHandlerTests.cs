@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace Advisor.Tests.UnitTests;
+namespace Advisor.Tests.UnitTests.ExceptionHandlerUnitTests;
 public class GeneralExceptionHandlerTests
 {
     private readonly GeneralExceptionHandler _handler;
