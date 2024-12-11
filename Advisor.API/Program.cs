@@ -65,4 +65,3 @@ app.NewVersionedApi("Advisor API")
 
 app.Run();
 
-public partial class Program { }
