@@ -53,4 +53,9 @@ public class DBRepository<T, TContext> : IDBRepository<T>
     {
         return _context;
     }
+
+    public IQueryable<T> GetAllQueryable()
+    {
+        return _context.Set<T>().AsQueryable();
+    }
 }
