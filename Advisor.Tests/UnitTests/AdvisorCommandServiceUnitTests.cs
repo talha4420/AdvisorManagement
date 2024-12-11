@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using Advisor.Core.Repositories;
 using Advisor.Domain.DomainServices;
 using Advisor.Domain.Models;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 
 namespace Advisor.Tests.UnitTests;
@@ -29,6 +31,8 @@ public class AdvisorCommandServiceUnitTests
         var advisor = new AdvisorProfile { Id = Guid.NewGuid(), FullName = "John Doe", SIN = "123456789" };
         _mockHealthStatusGenerator.Setup(gen => gen.GenerateHealthStatus()).Returns(HealthStatus.Green);
         _mockRepository.Setup(repo => repo.CreateAsync(advisor)).ReturnsAsync(advisor);
+        _mockRepository.Setup(repo => repo.GetAllQueryable())
+            .Returns(new List<AdvisorProfile>().AsQueryable().BuildMock());
 
         // Act
         var result = await _service.CreateAdvisorAsync(advisor);
@@ -36,6 +40,26 @@ public class AdvisorCommandServiceUnitTests
         // Assert
         Assert.Equal(HealthStatus.Green, advisor.HealthStatus);
         _mockRepository.Verify(repo => repo.CreateAsync(advisor), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAdvisorAsync_ThrowsValidationException_WhenSINIsDuplicated()
+    {
+        // Arrange
+        var advisor = new AdvisorProfile { Id = Guid.NewGuid(), FullName = "John Doe", SIN = "123456789" };
+        var existingAdvisor = new AdvisorProfile { Id = Guid.NewGuid(), FullName = "Jane Doe", SIN = "123456789" };
+
+        // Mock the repository to return an advisor with the same SIN
+        _mockRepository.Setup(repo => repo.GetAllQueryable())
+            .Returns(new List<AdvisorProfile> { existingAdvisor }.AsQueryable().BuildMock());
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => _service.CreateAdvisorAsync(advisor));
+
+        Assert.Equal("SIN must be unique. A record with this SIN already exists.", exception.Message);
+
+        // Verify that CreateAsync is never called
+        _mockRepository.Verify(repo => repo.CreateAsync(It.IsAny<AdvisorProfile>()), Times.Never);
     }
 
     [Fact]
@@ -52,6 +76,7 @@ public class AdvisorCommandServiceUnitTests
         // Assert
         _mockRepository.Verify(repo => repo.UpdateAsync(Id, advisor), Times.Once);
     }
+    
 
     [Fact]
     public async Task DeleteAdvisorAsync_DeletesAdvisor()

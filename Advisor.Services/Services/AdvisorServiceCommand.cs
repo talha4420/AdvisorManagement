@@ -2,6 +2,7 @@ using Advisor.Core.Repositories;
 using Advisor.Domain.DomainServices;
 using Advisor.Domain.Models;
 using Advisor.Services.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
@@ -19,11 +20,13 @@ public class AdvisorCommandService(
         advisor.UpdateHealthStatus(healthStatusGenerator);
 
         //Explicit fix for inmemory DB unique Issue
-        //if (advisorRepository.GetDBContext().Set<AdvisorProfile>().Any(p => p.SIN == advisor.SIN))
-        //{
-        //    throw new ValidationException("SIN must be unique. A record with this SIN already exists.");
-        //}
-
+        var existingAdvisor = advisorRepository.GetAllQueryable().Where(p => p.SIN == advisor.SIN);
+        if (await existingAdvisor.AnyAsync())
+        {
+            logger.LogWarning("Advisor with SIN: {SIN} already exists at {Time}.", advisor.SIN, DateTime.UtcNow);
+            throw new ValidationException("SIN must be unique. A record with this SIN already exists.");
+        }
+        
         var createdAdvisor = await advisorRepository.CreateAsync(advisor);
         logger.LogInformation("Successfully created a new advisor with ID: {AdvisorId} at {Time}.", createdAdvisor.Id, DateTime.UtcNow);
         return createdAdvisor;
