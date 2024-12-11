@@ -36,19 +36,27 @@ public class AdvisorApiFunctionalTests : IClassFixture<WebApplicationFactory<Pro
             new AdvisorProfile { FullName = "John Doe", SIN = "123456789" },
             new AdvisorProfile { FullName = "Jane Smith", SIN = "987654321" }
         };
-        _mockAdvisorQuery.Setup(service => service.GetAdvisorsAsync()).ReturnsAsync(advisors);
+
+        var advisorPagedResult = new PagedResult<AdvisorProfile>
+        {
+            Items = advisors,
+            TotalRecords = 2,
+            PageNumber = 1,
+            PageSize = 2
+        };
+        _mockAdvisorQuery.Setup(service => service.GetAdvisorsAsyncWithPage(1,2)).ReturnsAsync(advisorPagedResult);
 
         var client = _factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/api/v1/advisors");
+        var response = await client.GetAsync("/api/v1/advisors?pageNumber=1&pageSize=2");
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<AdvisorProfile>>();
-        Assert.Equal(2, result.Count);
-        Assert.Equal("John Doe", result[0].FullName);
-        Assert.Equal("Jane Smith", result[1].FullName);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<AdvisorProfile>>();
+        Assert.Equal(2, result.Items.Count());
+        Assert.Equal("John Doe", result.Items.First().FullName); 
+        Assert.Equal("Jane Smith", result.Items.Last().FullName);
     }
 
     [Fact]

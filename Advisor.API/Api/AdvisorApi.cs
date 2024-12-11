@@ -31,11 +31,19 @@ public static class AdvisorApi
     }
 
     public static async Task<IResult> GetAdvisors(
+        int pageNumber,
+        int pageSize,
         [FromServices] IAdvisorQuery service,
         [FromServices] IMapper mapper)
     {
-        var advisors = await service.GetAdvisorsAsync();
-        var responseDtos = mapper.Map<IEnumerable<AdvisorProfileResponseDto>>(advisors);
+        var advisors = await service.GetAdvisorsAsyncWithPage(pageNumber, pageSize);
+        var responseDtos = new PagedResult<AdvisorProfileResponseDto>
+        {
+            Items = mapper.Map<IEnumerable<AdvisorProfileResponseDto>>(advisors.Items),
+            TotalRecords = advisors.TotalRecords,
+            PageNumber = advisors.PageNumber,
+            PageSize = advisors.PageSize
+        };
         return Results.Ok(responseDtos);
     }
 

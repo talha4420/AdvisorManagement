@@ -31,25 +31,41 @@ public class AdvisorApiUnitTests
             new AdvisorProfile { FullName = "Jane Smith" }
         };
 
+        var advisorPagedResult = new PagedResult<AdvisorProfile>
+        {
+            Items = advisors,
+            TotalRecords = 2,
+            PageNumber = 1,
+            PageSize = 2
+        };
+
         var responseDtos = new List<AdvisorProfileResponseDto>
         {
             new AdvisorProfileResponseDto { FullName = "John Doe" },
             new AdvisorProfileResponseDto { FullName = "Jane Smith" }
         };
 
-        _mockAdvisorQuery.Setup(s => s.GetAdvisorsAsync()).ReturnsAsync(advisors);
+        var advisorPagedResultDto = new PagedResult<AdvisorProfileResponseDto>
+        {
+            Items = responseDtos,
+            TotalRecords = 2,
+            PageNumber = 1,
+            PageSize = 2
+        };
+
+        _mockAdvisorQuery.Setup(s => s.GetAdvisorsAsyncWithPage(1,2)).ReturnsAsync(advisorPagedResult);
         _mockMapper.Setup(m => m.Map<IEnumerable<AdvisorProfileResponseDto>>(advisors)).Returns(responseDtos);
 
         // Act
-        var result = await AdvisorApi.GetAdvisors(_mockAdvisorQuery.Object, _mockMapper.Object);
+        var result = await AdvisorApi.GetAdvisors(1,2, _mockAdvisorQuery.Object, _mockMapper.Object);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IEnumerable<AdvisorProfileResponseDto>>>(result);
+        var okResult = Assert.IsType<Ok<PagedResult<AdvisorProfileResponseDto>>>(result);
         var returnValue = okResult.Value;
 
         Assert.NotNull(returnValue);
-        Assert.Equal(2, returnValue.Count());
-        _mockAdvisorQuery.Verify(s => s.GetAdvisorsAsync(), Times.Once);
+        Assert.Equal(2, returnValue.Items.Count());
+        _mockAdvisorQuery.Verify(s => s.GetAdvisorsAsyncWithPage(1,2), Times.Once);
         _mockMapper.Verify(m => m.Map<IEnumerable<AdvisorProfileResponseDto>>(advisors), Times.Once);
     }
 

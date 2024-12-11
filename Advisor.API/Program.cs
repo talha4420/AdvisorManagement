@@ -6,6 +6,7 @@ using Advisor.Core.Repositories;
 using Advisor.Services.Models;
 using Advisor.API.ExceptionHandling;
 using Advisor.Domain.DomainServices;
+using Advisor.Core.Pagination;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,8 @@ builder.Services.AddDbContext<AdvisorDBContext>(options =>
 
 // Register repositories and services
 builder.Services.AddScoped<IDBRepository<AdvisorProfile>, DBRepository<AdvisorProfile, AdvisorDBContext>>();
+builder.Services.AddScoped<IPaginator, PaginationService>();
+
 builder.Services.AddScoped<IAdvisorCommand, AdvisorCommandService>();
 builder.Services.AddScoped<IAdvisorQuery, AdvisorQueryService>();
 builder.Services.AddScoped<IHealthStatusGenerator, HealthStatusGeneratorService>();
