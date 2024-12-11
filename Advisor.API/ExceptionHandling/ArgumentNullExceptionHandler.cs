@@ -5,16 +5,16 @@ using System.ComponentModel.DataAnnotations;
 namespace Advisor.API.ExceptionHandling;
 public class ArgumentNullExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<DatabaseExceptionHandler> _logger;
+    private readonly ILogger<ArgumentNullExceptionHandler> _logger;
 
-    public ArgumentNullExceptionHandler(ILogger<DatabaseExceptionHandler> logger)
+    public ArgumentNullExceptionHandler(ILogger<ArgumentNullExceptionHandler> logger)
     {
         _logger = logger;
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        if (exception is ValidationException || exception.InnerException is ValidationException)
+        if (exception is ArgumentNullException || exception.InnerException is ArgumentNullException)
         {
             _logger.LogError(exception, "ArgumentNullException exception occurred: {Message}", exception.Message);
 

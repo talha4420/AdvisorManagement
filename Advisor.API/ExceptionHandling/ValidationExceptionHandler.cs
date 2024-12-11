@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Advisor.API.ExceptionHandling;
 public class ValidationExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<DatabaseExceptionHandler> _logger;
+    private readonly ILogger<ValidationExceptionHandler> _logger;
 
-    public ValidationExceptionHandler(ILogger<DatabaseExceptionHandler> logger)
+    public ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger)
     {
         _logger = logger;
     }
