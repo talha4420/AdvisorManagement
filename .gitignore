@@ -4,3 +4,4 @@ Advisor.API/appsettings.Development.json
 Advisor.API/Properties/
 /.vs
 /Advisor.API/Advisor.API.csproj.user
+.vscode/launch.json
