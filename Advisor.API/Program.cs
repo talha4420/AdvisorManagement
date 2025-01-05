@@ -58,7 +58,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTheme(ScalarTheme.DeepSpace);
+        options.WithTitle("Advisor API");
+        options.WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios);
+    });
     //app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
