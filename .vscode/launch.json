@@ -1,0 +1,19 @@
+{
+    "configurations": [
+      {
+        "type": "coreclr",
+        "request": "launch",
+        "name": "Launch Advisor.API",
+        "program": "${workspaceFolder}/Advisor.API/bin/Debug/net9.0/Advisor.API.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}/Advisor.API",
+        "stopAtEntry": false,
+        "preLaunchTask": "build",
+        "env": {
+            "ASPNETCORE_ENVIRONMENT": "Development",
+            "CUSTOM_VARIABLE": "YourValueHere"
+        }
+      }
+    ]
+  }
+  

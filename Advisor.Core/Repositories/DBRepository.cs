@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Advisor.Core.Repositories;
@@ -41,7 +42,7 @@ public class DBRepository<T, TContext> : IDBRepository<T>
 
         if (existingEntity == null)
         {
-            throw new KeyNotFoundException($"Entity with Id '{Id}' not found.");
+            throw new ValidationException($"Entity with Id '{Id}' not found.");
         }
 
         _context.Entry(existingEntity).CurrentValues.SetValues(entity);

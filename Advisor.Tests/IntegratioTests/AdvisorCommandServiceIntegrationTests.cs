@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Advisor.Core.DBContexts;
 using Advisor.Core.Repositories;
 using Advisor.Domain.DomainServices;
@@ -78,7 +79,7 @@ public class AdvisorCommandServiceIntegrationTests : IDisposable
         var advisorUpdate = new AdvisorProfile { Id = Id,  FullName = "John Ben", SIN = "123456780" };
 
         // Act
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+        var exception = await Assert.ThrowsAsync<ValidationException>(
             () => _service.UpdateAdvisorAsync(Id, advisorUpdate)
         );
 
