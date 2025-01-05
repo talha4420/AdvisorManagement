@@ -7,8 +7,11 @@ using Advisor.Services.Models;
 using Advisor.API.ExceptionHandling;
 using Advisor.Domain.DomainServices;
 using Advisor.Core.Pagination;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenApi();
 
 // Add ProblemDetails and Exception Handlers
 builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
@@ -20,7 +23,7 @@ builder.Services.AddProblemDetails();
 // Add services to the container.
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 
 // Configure EF Core to use an in-memory database
 builder.Services.AddDbContext<AdvisorDBContext>(options =>
@@ -43,7 +46,8 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
-}).AddApiExplorer(options =>
+})
+.AddApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV";
     options.SubstituteApiVersionInUrl = true;
@@ -53,8 +57,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+    //app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "Advisor.API | v1");
+    });
 
     using (var scope = app.Services.CreateScope())
     {
